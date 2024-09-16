@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { verifyEmail } from "@/lib/actions/user.action";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
@@ -34,7 +34,7 @@ const VerifyEmailPage: React.FC = () => {
   }, [token]);
 
   return (
-
+    
     <DefaultLayout>
       <div className="mt-20 h-screen  text-center">
         <span className="mt-15 inline-block">
@@ -61,4 +61,14 @@ const VerifyEmailPage: React.FC = () => {
   );
 };
 
-export default VerifyEmailPage;
+const WrappedVerifyEmailPage: React.FC = () => {
+
+  return(
+
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailPage/>
+    </Suspense>
+  )
+}
+
+export default WrappedVerifyEmailPage;

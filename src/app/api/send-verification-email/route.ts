@@ -1,7 +1,7 @@
 // app/api/send-verification-email/route.ts
-
 import { VerifyEmailTemplate } from "@/components/EmailTemplates/verify-email";
 import { Resend } from "resend";
+
 const resend = new Resend(process.env.RESEND_KEY);
 
 export async function POST(request: Request) {

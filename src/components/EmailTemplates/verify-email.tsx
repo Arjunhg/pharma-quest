@@ -1,5 +1,4 @@
 import * as React from "react";
-
 interface VerifyEmailTemplateProps {
   firstName: string;
   verificationUrl: string;
@@ -8,6 +7,7 @@ interface VerifyEmailTemplateProps {
 export const VerifyEmailTemplate: React.FC<
   Readonly<VerifyEmailTemplateProps>
 > = ({ firstName, verificationUrl }) => (
+  
 
   <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
     <h1>Welcome, {firstName}!</h1>
