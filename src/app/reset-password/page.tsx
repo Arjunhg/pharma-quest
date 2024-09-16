@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { LoaderCircle, LockIcon } from "lucide-react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
@@ -8,15 +8,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { resetPassword } from "@/lib/actions/user.action";
 
 const ResetPasswordPage: React.FC = () => {
-
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +33,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     try {
+      const token = useSearchParams().get("token");
       await resetPassword(token as string, password);
 
       setSuccess(true);
@@ -51,7 +49,6 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-
     <DefaultLayout>
       <Breadcrumb pageName="Reset Password" />
 
@@ -70,77 +67,104 @@ const ResetPasswordPage: React.FC = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your new password"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                      required
-                    />
-                    <span className="absolute right-4 top-4">
-                      <LockIcon />
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm your new password"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                      required
-                    />
-                    <span className="absolute right-4 top-4">
-                      <LockIcon />
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mb-5 flex justify-center">
-                  <button
-                    type="submit"
-                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center">
-                        <LoaderCircle className="mr-2 animate-spin" />{" "}
-                        Processing...
-                      </span>
-                    ) : (
-                      "Reset Password"
-                    )}
-                  </button>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p>
-                    Don’t have an account?{" "}
-                    <Link href="/auth/signup" className="text-primary">
-                      Sign Up
-                    </Link>
-                  </p>
-                </div>
-              </form>
+              <Suspense fallback={<div>Loading...</div>}>
+                <ResetPasswordForm
+                  password={password}
+                  setPassword={setPassword}
+                  confirmPassword={confirmPassword}
+                  setConfirmPassword={setConfirmPassword}
+                  handleSubmit={handleSubmit}
+                  isLoading={isLoading}
+                />
+              </Suspense>
             </div>
           </div>
         </div>
       </div>
-      
     </DefaultLayout>
+  );
+};
+
+const ResetPasswordForm: React.FC<{
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  confirmPassword: string;
+  setConfirmPassword: React.Dispatch<React.SetStateAction<string>>;
+  handleSubmit: (e: React.FormEvent) => void;
+  isLoading: boolean;
+}> = ({
+  password,
+  setPassword,
+  confirmPassword,
+  setConfirmPassword,
+  handleSubmit,
+  isLoading,
+}) => {
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-4">
+        <label className="mb-2.5 block font-medium text-black dark:text-white">
+          New Password
+        </label>
+        <div className="relative">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your new password"
+            className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            required
+          />
+          <span className="absolute right-4 top-4">
+            <LockIcon />
+          </span>
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <label className="mb-2.5 block font-medium text-black dark:text-white">
+          Confirm New Password
+        </label>
+        <div className="relative">
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm your new password"
+            className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            required
+          />
+          <span className="absolute right-4 top-4">
+            <LockIcon />
+          </span>
+        </div>
+      </div>
+
+      <div className="mb-5 flex justify-center">
+        <button
+          type="submit"
+          className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center">
+              <LoaderCircle className="mr-2 animate-spin" /> Processing...
+            </span>
+          ) : (
+            "Reset Password"
+          )}
+        </button>
+      </div>
+
+      <div className="mt-6 text-center">
+        <p>
+          Don’t have an account?{" "}
+          <Link href="/auth/signup" className="text-primary">
+            Sign Up
+          </Link>
+        </p>
+      </div>
+    </form>
   );
 };
 
