@@ -1,6 +1,6 @@
 "use client";
-import Modal from "@/app/ui/modals/page";
 import React from "react";
+import Modal from "@/app/ui/modals/Modal"; // Update this import path
 
 interface ComponentHeaderProps {
   pageName: string;
