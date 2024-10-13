@@ -434,7 +434,8 @@ const SignUp: React.FC = () => {
                   </div>
                 </div>
 
-                {errors && <div className="mb-4 text-red">{errors}</div>}
+                {!errors && <div className="mb-4 text-red">{errors}</div>}
+                {errors && <div className="mb-4 text-green">Sign Up Successfull, Please Sign In now.</div>}
                 <div className="mb-5">
                   <button
                     type="submit"
