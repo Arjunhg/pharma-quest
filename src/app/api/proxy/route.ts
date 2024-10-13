@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import axios from 'axios';
 
-export async function POST(req: NextRequest){
+export async function POST(req: NextRequest) {
     const invokeUrl = "https://health.api.nvidia.com/v1/biology/nvidia/molmim/generate";
 
     try {
@@ -13,20 +12,38 @@ export async function POST(req: NextRequest){
             hasApiKey: !!process.env.NVIDIA_API_KEY
         });
 
-        const response = await axios.post(invokeUrl, body, {
-            headers:{
+        const response = await fetch(invokeUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${process.env.NVIDIA_API_KEY}`,
             },
+            body: JSON.stringify(body),
         });
 
-        console.log("Received response from NVIDIA API:", {
+        if (!response.ok) {
+            throw new Error(`NVIDIA API responded with status ${response.status}`);
+        }
+
+        const responseText = await response.text();
+        console.log("Raw response from NVIDIA API:", responseText);
+
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error("Error parsing JSON response:", parseError);
+            return NextResponse.json({ error: "Invalid JSON response from NVIDIA API" }, { status: 502 });
+        }
+
+        console.log("Parsed response from NVIDIA API:", {
             status: response.status,
-            dataLength: JSON.stringify(response.data).length
+            dataLength: JSON.stringify(data).length
         });
 
-        return NextResponse.json(response.data, {status:200});
+        return NextResponse.json(data, { status: 200 });
         
-    } catch (error:any) {
+    } catch (error: any) {
         console.error("Detailed error in proxy:", {
             message: error.message,
             stack: error.stack,
@@ -42,7 +59,7 @@ export async function POST(req: NextRequest){
                 details: error.message
             },
             {
-                status: 500
+                status: error.response?.status || 500
             }
         );
     }

@@ -11,7 +11,6 @@ import {
   getMoleculeGenerationHistoryByUser,
 } from "@/lib/actions/molecule-generation.actions";
 import { getUserByEmail } from "@/lib/actions/user.action";
-import axios from "axios";
 
 const ModalLayout = () => {
 
@@ -28,6 +27,7 @@ const ModalLayout = () => {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -51,7 +51,7 @@ const ModalLayout = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
-
+  
     const payload = {
       algorithm: "CMA-ES",
       num_molecules: parseInt(numMolecules),
@@ -62,35 +62,33 @@ const ModalLayout = () => {
       iterations: parseInt(iterations),
       smi: smiles,
     };
-
+  
     try {
-    //   const response = await fetch(invokeUrl, {
-    //     method: "POST",
-    //     headers: {
-    //       Authorization: `Bearer ${API_KEY}`,
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(payload),
-    //   });
-
-    //   const data = await response.json();
-
-      const response = await axios.post("/api/proxy", {
+      const response = await fetch("/api/proxy", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-      }); 
-
-      const data = response.data
-
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (!data.molecules) {
+        throw new Error("No molecules data in the response");
+      }
+  
       const generatedMolecules = JSON.parse(data.molecules).map((mol: any) => ({
         structure: mol.sample,
         score: mol.score,
       }));
-
+  
       setMolecules(generatedMolecules);
-
+  
       if (userId) {
         await createMoleculeGenerationHistory(
           {
@@ -103,16 +101,18 @@ const ModalLayout = () => {
           },
           userId,
         );
-
+  
         const updatedHistory = await getMoleculeGenerationHistoryByUser(userId);
         setHistory(updatedHistory);
       } else {
         console.error("User ID is not available.");
       }
-
+  
       console.log(generatedMolecules);
-    } catch (error) {
+    } catch (error:any) {
       console.error("Error fetching data:", error);
+      // Handle the error appropriately, e.g., show an error message to the user
+      setError(error.message);
     } finally {
       setLoading(false);
     }
