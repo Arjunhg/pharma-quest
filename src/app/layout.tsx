@@ -7,6 +7,8 @@ import { SessionProvider } from "next-auth/react";
 import { UserProvider } from "./context/UserContext";
 import * as Ably from "ably";
 import { ChannelProvider, AblyProvider } from "ably/react";
+import { Analytics } from '@vercel/analytics/react';
+
 
 export default function RootLayout({
   children,
@@ -27,10 +29,12 @@ export default function RootLayout({
       <body suppressHydrationWarning={true}>
 
         <SessionProvider>
+
           <UserProvider>
             <AblyProvider client={client}>
               <ChannelProvider channelName="chat-demo1">
                 {children}
+                <Analytics/>
               </ChannelProvider>
             </AblyProvider>
           </UserProvider>
