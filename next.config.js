@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const CopyPlugin = require("copy-webpack-plugin");
 
 /** @type {import('next').NextConfig} */
@@ -23,6 +25,9 @@ const nextConfig = {
 
     return config;
   },
+  env: {
+    API_URL: "http://localhost:3000"
+  }
 };
 
 module.exports = nextConfig;

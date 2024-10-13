@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import axios from 'axios';
 
 export async function POST(req: NextRequest){
 
@@ -8,18 +9,13 @@ export async function POST(req: NextRequest){
 
         const body = await req.json();
 
-        const response = await fetch(invokeUrl, {
-            method: "POST",
+        const response = await axios.post(invokeUrl, body, {
             headers:{
-                "Content-Type": "application/json",
                 "Authorization": `Bearer ${process.env.NVIDIA_API_KEY}`,
             },
-            body: JSON.stringify(body),
         })
 
-        const data = await response.json();
-
-        return NextResponse.json(data,{status:200});
+        return NextResponse.json(response.data,{status:200});
         
     } catch (error) {
         

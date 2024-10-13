@@ -3,6 +3,7 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import MoleculeStructure from "@/components/MoleculeStructure";
 import { useState } from "react";
 import { Search } from "lucide-react";
+import axios from "axios";
 
 export default function PubChem() {
   const [compoundName, setCompoundName] = useState("");
@@ -16,53 +17,47 @@ export default function PubChem() {
     setCompoundData(null);
 
     try {
-      const response = await fetch(
-
-        // pubchem platform is an open platform where researchers can search for compound and get properties which is going to help them in drug research
-        `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(
-          compoundName,
-        )}/property/MolecularFormula,MolecularWeight,InChIKey,CanonicalSMILES,IsomericSMILES,IUPACName,XLogP,ExactMass,MonoisotopicMass,TPSA,Complexity,Charge,HBondDonorCount,HBondAcceptorCount,RotatableBondCount,HeavyAtomCount/JSON`,
+      const response = await axios.post(
+        // PubChem platform URL to fetch compound properties
+        `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(compoundName)}/property/MolecularFormula,MolecularWeight,InChIKey,CanonicalSMILES,IsomericSMILES,IUPACName,XLogP,ExactMass,MonoisotopicMass,TPSA,Complexity,Charge,HBondDonorCount,HBondAcceptorCount,RotatableBondCount,HeavyAtomCount/JSON`
       );
-
-      if (!response.ok) {
-        throw new Error("Compound not found");
-      }
-
-      const data = await response.json();
-
-      if (
-        data &&
-        data.PropertyTable &&
-        data.PropertyTable.Properties &&
-        data.PropertyTable.Properties.length > 0
-      ) {
-        const compoundInfo = data.PropertyTable.Properties[0];
-        setCompoundData({
-          MolecularFormula: compoundInfo.MolecularFormula,
-          MolecularWeight: compoundInfo.MolecularWeight,
-          InChIKey: compoundInfo.InChIKey,
-          CanonicalSMILES: compoundInfo.CanonicalSMILES,
-          IsomericSMILES: compoundInfo.IsomericSMILES,
-          IUPACName: compoundInfo.IUPACName,
-          XLogP: compoundInfo.XLogP,
-          ExactMass: compoundInfo.ExactMass,
-          MonoisotopicMass: compoundInfo.MonoisotopicMass,
-          TPSA: compoundInfo.TPSA,
-          Complexity: compoundInfo.Complexity,
-          Charge: compoundInfo.Charge,
-          HBondDonorCount: compoundInfo.HBondDonorCount,
-          HBondAcceptorCount: compoundInfo.HBondAcceptorCount,
-          RotatableBondCount: compoundInfo.RotatableBondCount,
-          HeavyAtomCount: compoundInfo.HeavyAtomCount,
-        });
+    
+      // Check if the response status is in the success range
+      if (response.status >= 200 && response.status < 300) {
+        const data = response.data;
+    
+        if (data && data.PropertyTable && data.PropertyTable.Properties && data.PropertyTable.Properties.length > 0) {
+          const compoundInfo = data.PropertyTable.Properties[0];
+          setCompoundData({
+            MolecularFormula: compoundInfo.MolecularFormula,
+            MolecularWeight: compoundInfo.MolecularWeight,
+            InChIKey: compoundInfo.InChIKey,
+            CanonicalSMILES: compoundInfo.CanonicalSMILES,
+            IsomericSMILES: compoundInfo.IsomericSMILES,
+            IUPACName: compoundInfo.IUPACName,
+            XLogP: compoundInfo.XLogP,
+            ExactMass: compoundInfo.ExactMass,
+            MonoisotopicMass: compoundInfo.MonoisotopicMass,
+            TPSA: compoundInfo.TPSA,
+            Complexity: compoundInfo.Complexity,
+            Charge: compoundInfo.Charge,
+            HBondDonorCount: compoundInfo.HBondDonorCount,
+            HBondAcceptorCount: compoundInfo.HBondAcceptorCount,
+            RotatableBondCount: compoundInfo.RotatableBondCount,
+            HeavyAtomCount: compoundInfo.HeavyAtomCount,
+          });
+        } else {
+          throw new Error("Compound data is not available");
+        }
       } else {
-        throw new Error("Compound data is not available");
+        throw new Error("Compound not found");
       }
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
+    
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

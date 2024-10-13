@@ -11,6 +11,7 @@ import {
   getMoleculeGenerationHistoryByUser,
 } from "@/lib/actions/molecule-generation.actions";
 import { getUserByEmail } from "@/lib/actions/user.action";
+import axios from "axios";
 
 const ModalLayout = () => {
 
@@ -75,15 +76,13 @@ const ModalLayout = () => {
 
     //   const data = await response.json();
 
-      const response = await fetch("/api/proxy", {
-        method: "POST",
+      const response = await axios.post("/api/proxy", {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
       }); 
 
-      const data = await response.json();
+      const data = response.data
 
       const generatedMolecules = JSON.parse(data.molecules).map((mol: any) => ({
         structure: mol.sample,
